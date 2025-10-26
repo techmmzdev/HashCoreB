@@ -1,0 +1,118 @@
+// This is your Prisma schema file,
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Plan {
+  BASIC
+  STANDARD
+  FULL
+}
+
+enum Role {
+  ADMIN
+  CLIENTE
+}
+
+enum ContentType {
+  POST
+  REEL
+}
+
+enum PublicationStatus {
+  DRAFT // Borrador / En Edición
+  SCHEDULED // Programada
+  PUBLISHED // Publicada
+}
+
+model users {
+  id            Int            @id @default(autoincrement())
+  email         String         @unique
+  password      String
+  role          Role           @default(CLIENTE) // Roles: "ADMIN", "CLIENTE"
+  name          String
+  created_at    DateTime       @default(now())
+  updated_at    DateTime       @default(now()) @updatedAt
+  clients       clients[]
+  comments      comments[]
+  calendarNotes CalendarNote[]
+}
+
+model clients {
+  id            Int            @id @default(autoincrement())
+  user_id       Int            @unique
+  company_name  String?
+  ruc           String?
+  contact_email String?
+  contact_phone String?
+  status        Boolean        @default(true)
+  plan          Plan           @default(BASIC)
+  created_at    DateTime       @default(now())
+  updated_at    DateTime       @default(now()) @updatedAt
+  user          users          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  publications  publications[]
+}
+
+model publications {
+  id           Int               @id @default(autoincrement())
+  client_id    Int
+  title        String?
+  content_type ContentType
+  publish_date DateTime          @default(now())
+  status       PublicationStatus @default(DRAFT)
+  created_at   DateTime          @default(now())
+  updated_at   DateTime          @default(now()) @updatedAt
+  client       clients           @relation(fields: [client_id], references: [id], onDelete: Cascade)
+  media        media[]
+  comments     comments[]
+
+  @@index([client_id])
+}
+
+model media {
+  id             Int          @id @default(autoincrement())
+  publication_id Int
+  media_type     String
+  url            String
+  created_at     DateTime     @default(now())
+  updated_at     DateTime     @default(now()) @updatedAt
+  publication    publications @relation(fields: [publication_id], references: [id], onDelete: Cascade)
+
+  @@index([publication_id])
+}
+
+model comments {
+  id             Int          @id @default(autoincrement())
+  user_id        Int
+  publication_id Int
+  comment        String
+  created_at     DateTime     @default(now())
+  updated_at     DateTime     @default(now()) @updatedAt
+  user           users        @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  publication    publications @relation(fields: [publication_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([publication_id])
+}
+
+model CalendarNote {
+  id          Int      @id @default(autoincrement())
+  user_id     Int
+  title       String
+  description String?
+  note_date   DateTime
+  is_event    Boolean  @default(false)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @default(now()) @updatedAt
+
+  user users @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([note_date])
+}
