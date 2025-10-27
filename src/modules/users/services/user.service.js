@@ -405,3 +405,43 @@ export const deleteUser = async (id) => {
     throw error;
   }
 };
+
+/**
+ * Cambiar contraseña de un usuario
+ */
+export const changePassword = async (userId, currentPassword, newPassword) => {
+  try {
+    // Obtener el usuario con su contraseña
+    const user = await prisma.users.findUnique({
+      where: { id: userId },
+      select: { id: true, password: true },
+    });
+
+    if (!user) {
+      throw new Error("Usuario no encontrado");
+    }
+
+    // Verificar que la contraseña actual es correcta
+    const isPasswordValid = await bcrypt.compare(
+      currentPassword,
+      user.password
+    );
+
+    if (!isPasswordValid) {
+      throw new Error("La contraseña actual es incorrecta");
+    }
+
+    // Hashear la nueva contraseña
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Actualizar la contraseña
+    await prisma.users.update({
+      where: { id: userId },
+      data: { password: hashedPassword },
+    });
+
+    return true;
+  } catch (error) {
+    throw error;
+  }
+};
