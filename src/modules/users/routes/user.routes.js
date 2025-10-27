@@ -9,6 +9,7 @@ import {
   updateUserWithClient,
   deleteUser,
   getMyProfile,
+  changeMyPassword,
 } from "../controllers/user.controller.js";
 import { authenticateJWT, requireAdmin } from "../../../middlewares/index.js";
 
@@ -27,6 +28,7 @@ router.delete("/:id", authenticateJWT, requireAdmin, deleteUser); // SOLO ADMIN
 
 // =================== RUTAS PROTEGIDAS - ADMIN O PROPIO USUARIO ===================
 router.get("/me", authenticateJWT, getMyProfile); // Usuario actual
+router.put("/me/password", authenticateJWT, changeMyPassword); // Cambiar contraseña
 router.get("/:id", authenticateJWT, getUserById); // ADMIN o el propio
 router.put("/:id", authenticateJWT, updateUser); // ADMIN o el propio (básico)
 router.put("/:id/with-client", authenticateJWT, updateUserWithClient); // ADMIN o el propio (completo)

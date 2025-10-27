@@ -3,6 +3,7 @@ import express from "express";
 import {
   getAllClients,
   getMyClientInfo,
+  updateMyClientInfo,
   getClientById,
   getClientByUserId,
   getClientPublications,
@@ -17,6 +18,7 @@ const router = express.Router();
 // =================== RUTAS PROTEGIDAS - CLIENTE ===================
 // IMPORTANTE: Estas rutas van ANTES que las rutas con parámetros
 router.get("/me", authenticateJWT, getMyClientInfo); // Mi información como cliente
+router.put("/me", authenticateJWT, updateMyClientInfo); // Actualizar mi información
 
 // =================== RUTAS PROTEGIDAS - ADMIN ===================
 router.get("/", authenticateJWT, requireAdmin, getAllClients); // Todos los clientes

@@ -32,6 +32,47 @@ export const getMyClientInfo = async (req, res) => {
 };
 
 /**
+ * Actualizar información del cliente actual (CLIENTE logueado)
+ */
+export const updateMyClientInfo = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // Primero obtenemos el cliente para verificar que existe y obtener su ID
+    const client = await clientService.getClientByUserId(userId);
+
+    // Solo permitimos actualizar ciertos campos
+    const allowedFields = [
+      "company_name",
+      "ruc",
+      "contact_email",
+      "contact_phone",
+    ];
+    const updates = {};
+
+    for (const field of allowedFields) {
+      if (req.body[field] !== undefined) {
+        updates[field] = req.body[field];
+      }
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({
+        message: "No se proporcionaron campos válidos para actualizar.",
+      });
+    }
+
+    const updatedClient = await clientService.updateClient(client.id, updates);
+    res.status(200).json({
+      client: updatedClient,
+      message: "Perfil actualizado exitosamente",
+    });
+  } catch (error) {
+    handleControllerError(res, error, "Error al actualizar tu perfil");
+  }
+};
+
+/**
  * Obtener cliente por ID (Solo ADMIN)
  */
 export const getClientById = async (req, res) => {

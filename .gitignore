@@ -55,3 +55,7 @@ ecosystem.config.js
 # Build
 dist
 build
+
+# Uploads - Mantener carpeta pero ignorar contenido
+uploads/*
+!uploads/.gitkeep

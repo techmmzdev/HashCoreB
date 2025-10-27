@@ -186,3 +186,40 @@ export const getMyProfile = async (req, res) => {
     handleControllerError(res, error, "Error al obtener el perfil");
   }
 };
+
+/**
+ * Cambiar contraseña del usuario actual
+ */
+export const changeMyPassword = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { currentPassword, newPassword } = req.body;
+
+    // Validaciones
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        message: "Se requiere la contraseña actual y la nueva contraseña",
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        message: "La nueva contraseña debe tener al menos 6 caracteres",
+      });
+    }
+
+    if (currentPassword === newPassword) {
+      return res.status(400).json({
+        message: "La nueva contraseña debe ser diferente a la actual",
+      });
+    }
+
+    await userService.changePassword(userId, currentPassword, newPassword);
+
+    res.status(200).json({
+      message: "Contraseña actualizada exitosamente",
+    });
+  } catch (error) {
+    handleControllerError(res, error, "Error al cambiar la contraseña");
+  }
+};
