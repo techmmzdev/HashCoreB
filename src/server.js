@@ -3,12 +3,16 @@ import app from "./app.js";
 import { ENV } from "./config/index.js";
 import { initDB, closeDB } from "./config/index.js";
 import { logger } from "./shared/utils/logger.js";
+import { startPublicationScheduler } from "./scheduler/publicationScheduler.js";
 
 const startServer = async () => {
   try {
     // Inicializar conexión a la base de datos
     await initDB();
     logger.db("Conectado a la base de datos");
+
+    // Inicializar el scheduler de publicaciones
+    startPublicationScheduler();
 
     // Iniciar el servidor
     const server = app.listen(ENV.port, () => {

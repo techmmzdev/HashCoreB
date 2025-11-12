@@ -86,42 +86,12 @@ export const uploadMedia = async (req, res) => {
 
     const newMedia = await mediaService.createMedia(publicationId, mediaData);
 
-    // ====== PUBLICAR AUTOMÁTICAMENTE SI SE SOLICITÓ ======
-    const publishNow = req.query?.publishNow === "true";
-
-    if (publishNow) {
-      if ((publication.status || "").toUpperCase() === "DRAFT") {
-        await publicationService.updatePublication(publicationId, {
-          status: "PUBLISHED",
-          publish_date: new Date(),
-        });
-
-        const updatedPublication = await publicationService.getPublicationById(
-          publicationId
-        );
-        return res.status(201).json({
-          media: newMedia,
-          published: true,
-          publication: updatedPublication,
-          message: "Material multimedia subido y publicación publicada.",
-        });
-      }
-
-      // Si ya estaba SCHEDULED
-      return res.status(201).json({
-        media: newMedia,
-        published: false,
-        message: "Material multimedia subido. La publicación está programada.",
-      });
-    }
-
     // ====== RESPUESTA NORMAL ======
     const currentPublication = await publicationService.getPublicationById(
       publicationId
     );
     res.status(201).json({
       media: newMedia,
-      published: false,
       publication: currentPublication,
       message: "Material multimedia subido exitosamente.",
     });
