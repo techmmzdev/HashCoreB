@@ -1,12 +1,3 @@
-/**
- * Generar refresh token para un usuario
- */
-export const generateRefreshToken = (user) => {
-  const payload = { id: user.id };
-  return jwt.sign(payload, ENV.jwtRefreshSecret, {
-    expiresIn: ENV.jwtRefreshExpiresIn,
-  });
-};
 // backend/src/modules/auth/services/auth.service.js
 import { getPrisma } from "../../../config/db.js";
 import { ENV } from "../../../config/env.js";
@@ -59,7 +50,6 @@ export const loginUser = async (email, password) => {
     }
 
     const token = await generateToken(user);
-    const refreshToken = generateRefreshToken(user);
 
     // 🔧 Aquí simplificamos el usuario para el frontend
     const userData = {
@@ -72,26 +62,9 @@ export const loginUser = async (email, password) => {
       plan: user.clients?.[0]?.plan || null,
     };
 
-    return { token, refreshToken, user: userData };
+    return { token, user: userData };
   } catch (error) {
     throw error;
-  }
-};
-
-/**
- * Validar refresh token y generar nuevo access token
- */
-export const refreshTokenWithCookie = async (refreshToken) => {
-  try {
-    const decoded = jwt.verify(refreshToken, ENV.jwtRefreshSecret);
-    const user = await prisma.users.findUnique({
-      where: { id: decoded.id },
-      include: { clients: true },
-    });
-    if (!user) throw new Error("Usuario no encontrado");
-    return await generateToken(user);
-  } catch (error) {
-    return null;
   }
 };
 
@@ -103,5 +76,36 @@ export const verifyToken = (token) => {
     return jwt.verify(token, ENV.jwtSecret);
   } catch (error) {
     throw new Error("Token inválido o expirado");
+  }
+};
+
+/**
+ * Validar refresh token y emitir nuevo access token
+ */
+export const refreshToken = async (refreshToken) => {
+  try {
+    // Verificar refresh token
+    const payload = jwt.verify(refreshToken, ENV.jwtRefreshSecret);
+    // Buscar usuario
+    const user = await prisma.users.findUnique({
+      where: { id: payload.id },
+      include: { clients: true },
+    });
+    if (!user) throw new Error("Usuario no encontrado");
+    // Emitir nuevo access token
+    const token = await generateToken(user);
+    // Simplificar usuario para frontend
+    const userData = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      clientId: user.clients?.[0]?.id || null,
+      companyName: user.clients?.[0]?.company_name || null,
+      plan: user.clients?.[0]?.plan || null,
+    };
+    return { token, user: userData };
+  } catch (error) {
+    throw new Error("Refresh token inválido o expirado");
   }
 };

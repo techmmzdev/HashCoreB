@@ -16,7 +16,12 @@ export const loginUser = async (req, res) => {
   }
 
   try {
-    const { token, user } = await authService.loginUser(email, password);
+    const { token, refreshToken, user } = await authService.loginUser(
+      email,
+      password
+    );
+
+    // Ya no se setea cookie httpOnly para refreshToken
 
     // No incluir la contraseña en la respuesta
     const { password: _, ...userWithoutPassword } = user;
@@ -63,27 +68,21 @@ export const verifyToken = async (req, res) => {
  */
 export const refreshToken = async (req, res) => {
   try {
-    // Leer el refresh token desde la cookie
-    const refreshToken = req.cookies.refreshToken;
+    // Leer el refresh token desde el body
+    const { refreshToken } = req.body;
     if (!refreshToken) {
-      return res
-        .status(401)
-        .json({ message: "No se encontró el refresh token" });
+      return res.status(400).json({ message: "Refresh token requerido" });
     }
-
-    // Validar y generar nuevo access token
-    const newToken = await authService.refreshTokenWithCookie(refreshToken);
-    if (!newToken) {
-      return res
-        .status(401)
-        .json({ message: "Refresh token inválido o expirado" });
-    }
-
+    const { token, user } = await authService.refreshToken(refreshToken);
     res.status(200).json({
-      token: newToken,
+      token,
+      user,
       message: "Token renovado exitosamente",
     });
   } catch (error) {
+    if (error.message?.includes("inválido") || error.message?.includes("expirado")) {
+      return res.status(401).json({ message: error.message });
+    }
     handleControllerError(res, error, "Error al renovar token");
   }
 };

@@ -15,7 +15,7 @@ router.post("/login", loginUser);
 
 // =================== RUTAS PROTEGIDAS ===================
 router.get("/verify", authenticateJWT, verifyToken);
-router.post("/refresh", authenticateJWT, refreshToken);
+router.post("/refresh", refreshToken);
 router.post("/logout", authenticateJWT, logout);
 
 export default router;
