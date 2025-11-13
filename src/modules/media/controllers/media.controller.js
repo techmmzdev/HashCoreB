@@ -204,7 +204,7 @@ export const deleteMedia = async (req, res) => {
     if (result.publication) {
       return res.status(200).json({
         message:
-          "Material multimedia eliminado. La publicación se ha revertido a borrador.",
+          "Material multimedia eliminado. La publicación sigue activa sin archivos multimedia.",
         media: result.media,
         publication: result.publication,
         reverted: true,

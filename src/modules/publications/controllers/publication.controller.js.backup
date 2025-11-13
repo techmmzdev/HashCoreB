@@ -1,9 +1,11 @@
+// Backup de publication.controller.js
+
 // backend/src/modules/publications/controllers/publication.controller.js
 import * as publicationService from "../services/publication.service.js";
 import { handleControllerError } from "../../../shared/utils/errorHandler.js";
 
 const VALID_CONTENT_TYPES = ["POST", "REEL"];
-const VALID_STATUSES = ["SCHEDULED", "PUBLISHED"];
+const VALID_STATUSES = ["DRAFT", "SCHEDULED", "PUBLISHED"];
 
 /**
  * Obtiene TODAS las publicaciones para el ADMIN
@@ -85,7 +87,7 @@ export const getClientPublications = async (req, res) => {
           message: "No tienes permiso para ver estas publicaciones.",
         });
       }
-      // CLIENTE: Ahora ve TODAS sus publicaciones (SCHEDULED, PUBLISHED)
+      // CLIENTE: Ahora ve TODAS sus publicaciones (DRAFT, SCHEDULED, PUBLISHED)
       publications = await publicationService.getAllPublicationsByClient(
         clientId
       );
@@ -99,7 +101,7 @@ export const getClientPublications = async (req, res) => {
 
 /**
  * Obtiene publicaciones del cliente actual (para panel de cliente)
- * Retorna TODAS las publicaciones (SCHEDULED, PUBLISHED)
+ * Retorna TODAS las publicaciones (DRAFT, SCHEDULED, PUBLISHED)
  */
 export const getMyPublications = async (req, res) => {
   try {
@@ -234,7 +236,7 @@ export const updatePublicationStatus = async (req, res) => {
 
     if (!newStatus || !VALID_STATUSES.includes(newStatus)) {
       return res.status(400).json({
-        message: "Estado no válido. Use: SCHEDULED, PUBLISHED",
+        message: "Estado no válido. Use: " + VALID_STATUSES.join(", "),
       });
     }
 

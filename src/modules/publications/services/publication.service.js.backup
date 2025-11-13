@@ -1,3 +1,5 @@
+// Backup de publication.service.js
+
 // backend/src/modules/publications/services/publication.service.js
 import { getPrisma } from "../../../config/db.js";
 import fs from "fs";
@@ -5,7 +7,7 @@ import path from "path";
 
 const prisma = getPrisma();
 const VALID_CONTENT_TYPES = ["POST", "REEL"];
-const VALID_STATUSES = ["SCHEDULED", "PUBLISHED"];
+const VALID_STATUSES = ["DRAFT", "SCHEDULED", "PUBLISHED"];
 
 // ======================= HELPERS =======================
 
@@ -179,7 +181,7 @@ export const updatePublication = async (publicationId, updateData) => {
     }
 
     if (updateData.status && !VALID_STATUSES.includes(updateData.status)) {
-      throw new Error("Estado no válido. Use SCHEDULED o PUBLISHED.");
+      throw new Error("Estado no válido. Use DRAFT, SCHEDULED o PUBLISHED.");
     }
 
     // Convertir fecha si se proporciona
@@ -206,7 +208,10 @@ export const updatePublication = async (publicationId, updateData) => {
           updateData.content_type
         );
 
-        // Si se eliminó media, no se revierte el estado, solo se elimina la media incompatible
+        // Si se eliminó media, revertir a DRAFT si estaba publicada/programada
+        if (deletedMedia.length > 0 && !updateData.status) {
+          updateData.status = "DRAFT";
+        }
       }
     }
 
@@ -265,7 +270,7 @@ export const deletePublication = async (publicationId) => {
  */
 export const updatePublicationStatus = async (publicationId, newStatus) => {
   if (!VALID_STATUSES.includes(newStatus)) {
-    throw new Error("Estado no válido. Use SCHEDULED o PUBLISHED.");
+    throw new Error("Estado no válido. Use DRAFT, SCHEDULED o PUBLISHED.");
   }
 
   try {
@@ -302,7 +307,7 @@ export const createPublication = async (clientId, publicationData) => {
     title,
     content_type,
     publish_date,
-    status = "SCHEDULED",
+    status = "DRAFT",
   } = publicationData;
 
   if (!VALID_CONTENT_TYPES.includes(content_type)) {
@@ -312,7 +317,7 @@ export const createPublication = async (clientId, publicationData) => {
   }
 
   if (!VALID_STATUSES.includes(status)) {
-    throw new Error("Estado no válido. Use SCHEDULED o PUBLISHED.");
+    throw new Error("Estado no válido. Use DRAFT, SCHEDULED o PUBLISHED.");
   }
 
   try {

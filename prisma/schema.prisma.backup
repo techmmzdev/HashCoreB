@@ -1,3 +1,5 @@
+// Backup de schema.prisma
+
 // This is your Prisma schema file,
 
 generator client {
@@ -26,6 +28,7 @@ enum ContentType {
 }
 
 enum PublicationStatus {
+  DRAFT // Borrador / En Edición
   SCHEDULED // Programada
   PUBLISHED // Publicada
 }
@@ -64,7 +67,7 @@ model publications {
   title        String?
   content_type ContentType
   publish_date DateTime          @default(now())
-  status       PublicationStatus @default(SCHEDULED)
+  status       PublicationStatus @default(DRAFT)
   created_at   DateTime          @default(now())
   updated_at   DateTime          @default(now()) @updatedAt
   client       clients           @relation(fields: [client_id], references: [id], onDelete: Cascade)

@@ -63,7 +63,22 @@ export const verifyToken = async (req, res) => {
  */
 export const refreshToken = async (req, res) => {
   try {
-    const newToken = await authService.refreshToken(req.user.id);
+    // Leer el refresh token desde la cookie
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) {
+      return res
+        .status(401)
+        .json({ message: "No se encontró el refresh token" });
+    }
+
+    // Validar y generar nuevo access token
+    const newToken = await authService.refreshTokenWithCookie(refreshToken);
+    if (!newToken) {
+      return res
+        .status(401)
+        .json({ message: "Refresh token inválido o expirado" });
+    }
+
     res.status(200).json({
       token: newToken,
       message: "Token renovado exitosamente",

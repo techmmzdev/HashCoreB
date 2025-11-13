@@ -23,6 +23,10 @@ export const ENV = {
   jwtSecret: required("JWT_SECRET"),
   jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? "8h",
 
+  // 🔐 REFRESH TOKEN
+  jwtRefreshSecret: required("JWT_REFRESH_SECRET"),
+  jwtRefreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN ?? "8h",
+
   // 🌐 Supabase
   supabaseUrl: required("SUPABASE_URL"),
   supabaseKey: required("SUPABASE_KEY"),

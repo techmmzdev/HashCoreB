@@ -69,8 +69,8 @@ const checkAndPublish = async () => {
 
 // ⏰ Función para iniciar el cron job con configuración por variable de entorno
 export const startPublicationScheduler = () => {
-  // Lee el cron desde env, por defecto cada 1 minuto
-  const cronExpression = process.env.SCHEDULER_CRON || "*/1 * * * *";
+  // Lee el cron desde env, por defecto cada 5 minuto
+  const cronExpression = process.env.SCHEDULER_CRON || "*/5 * * * *";
   cron.schedule(cronExpression, checkAndPublish, {
     scheduled: true,
     timezone: "America/Lima", // Ajusta a tu zona horaria

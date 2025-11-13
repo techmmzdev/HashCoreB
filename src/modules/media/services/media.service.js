@@ -258,28 +258,12 @@ export const deleteMedia = async (publicationId, mediaId) => {
 
     logger.media(`📊 Media restante en publicación: ${remaining}`);
 
-    let publicationUpdated = null;
-    if (remaining === 0) {
-      // Si no quedan archivos multimedia y la publicación está publicada o programada,
-      // revertir a DRAFT
-      if (
-        media.publication &&
-        ["PUBLISHED", "SCHEDULED"].includes(media.publication.status)
-      ) {
-        publicationUpdated = await prisma.publications.update({
-          where: { id: media.publication_id },
-          data: { status: "DRAFT" },
-        });
-        logger.media(`🔄 Publicación revertida a DRAFT`);
-      }
-    }
-
     logger.media(`🎉 Eliminación completada exitosamente`);
 
     return {
       deleted: true,
       media,
-      publication: publicationUpdated,
+      publication: publicationId,
       remainingMedia: remaining,
     };
   } catch (error) {
